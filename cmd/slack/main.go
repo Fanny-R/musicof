@@ -44,10 +44,11 @@ func main() {
 			logger.Fatalln("Connection error,  exiting. Reason: ", ev.Error())
 		case *slack.InvalidAuthEvent:
 			logger.Fatalln("Invalid credentials")
-		case *slack.ConnectedEvent:
-			logger.Println("Infos:", ev.Info)
-			logger.Println("Connection counter:", ev.ConnectionCount)
+		case *slack.HelloEvent:
+			logger.Println("Received hello, sending greetings !")
 			rtm.SendMessage(rtm.NewOutgoingMessage("Hello, I'm musicof, let's play !", channelInfos.ID))
+		case *slack.ConnectedEvent:
+			logger.Println("Connected !")
 		case *slack.MessageEvent:
 			logger.Printf("Message: %v\n", ev)
 		}
