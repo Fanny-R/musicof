@@ -8,16 +8,18 @@ import (
 )
 
 func main() {
+	logger := log.New(os.Stdout, "musicof-bot: ", log.Lshortfile|log.LstdFlags)
+
 	token := os.Getenv("MUSICOF_SLACK_TOKEN")
 
 	if token == "" {
-		log.Fatal("Please define MUSICOF_SLACK_TOKEN")
+		logger.Fatal("Please define MUSICOF_SLACK_TOKEN")
 	}
 
 	channel := os.Getenv("MUSICOF_SLACK_CHANNEL")
 
 	if channel == "" {
-		log.Fatal("Please define a room to use using MUSICOF_SLACK_CHANNEL")
+		logger.Fatal("Please define a room to use using MUSICOF_SLACK_CHANNEL")
 	}
 
 	client := slack.New(token)
@@ -25,31 +27,29 @@ func main() {
 	channelInfos, err := client.GetChannelInfo(channel)
 
 	if err != nil {
-		log.Fatal("Failed to collect informations about selected channel, reason is :", err)
+		logger.Fatal("Failed to collect informations about selected channel, reason is :", err)
 	}
 
-	log.Println("Starting the musicof game in :", channelInfos.Name)
+	logger.Println("Starting the musicof game in :", channelInfos.Name)
 
 	rtm := client.NewRTM()
 	go rtm.ManageConnection()
 
 	for msg := range rtm.IncomingEvents {
-		log.Println("Message received")
+		logger.Println("Message received", msg.Type)
 		switch ev := msg.Data.(type) {
 		case *slack.ConnectingEvent:
-			log.Println("Connecting...", ev.Attempt)
+			logger.Println("Connecting...", ev.Attempt)
 		case *slack.ConnectionErrorEvent:
-			log.Fatalln("Failed to connect, exiting. Reason: ", ev.Error())
+			logger.Fatalln("Failed to connect, exiting. Reason: ", ev.Error())
 		case *slack.InvalidAuthEvent:
-			log.Fatalln("Invalid credentials")
+			logger.Fatalln("Invalid credentials")
 		case *slack.ConnectedEvent:
-			log.Println("Infos:", ev.Info)
-			log.Println("Connection counter:", ev.ConnectionCount)
+			logger.Println("Infos:", ev.Info)
+			logger.Println("Connection counter:", ev.ConnectionCount)
 			rtm.SendMessage(rtm.NewOutgoingMessage("Hello, I'm musicof, let's play !", channelInfos.ID))
 		case *slack.MessageEvent:
-			log.Printf("Message: %v\n", ev)
-		default:
-			log.Printf("Unexpected: %s : %v\n", msg.Type, msg.Data)
+			logger.Printf("Message: %v\n", ev)
 		}
 	}
 
