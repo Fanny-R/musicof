@@ -5,10 +5,11 @@ type Chooser interface {
 }
 
 type chooser struct {
+	provider ChoicesProvider
 }
 
-func NewChooser() Chooser {
-	return &chooser{}
+func NewChooser(provider ChoicesProvider) Chooser {
+	return &chooser{provider: provider}
 }
 
 func (c *chooser) Choose() (string, error) {

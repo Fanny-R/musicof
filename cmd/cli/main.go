@@ -7,7 +7,9 @@ import (
 )
 
 func main() {
-	c := core.NewChooser()
+	choices := []string{"Pikachu", "Chuchmur", "Ronflex", "Caninos"}
+	provider := core.NewDummyChoicesProvider(choices)
+	c := core.NewChooser(provider)
 	chosen, err := c.Choose()
 
 	if err != nil {
