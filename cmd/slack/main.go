@@ -41,7 +41,7 @@ func main() {
 		case *slack.ConnectingEvent:
 			logger.Println("Connecting...", ev.Attempt)
 		case *slack.ConnectionErrorEvent:
-			logger.Fatalln("Failed to connect, exiting. Reason: ", ev.Error())
+			logger.Fatalln("Connection error,  exiting. Reason: ", ev.Error())
 		case *slack.InvalidAuthEvent:
 			logger.Fatalln("Invalid credentials")
 		case *slack.ConnectedEvent:
