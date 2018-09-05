@@ -34,14 +34,22 @@ func main() {
 	go rtm.ManageConnection()
 
 	for msg := range rtm.IncomingEvents {
+		log.Println("Message received")
 		switch ev := msg.Data.(type) {
+		case *slack.ConnectingEvent:
+			log.Println("Connecting...", ev.Attempt)
+		case *slack.ConnectionErrorEvent:
+			log.Fatalln("Failed to connect, exiting. Reason: ", ev.Error())
+		case *slack.InvalidAuthEvent:
+			log.Fatalln("Invalid credentials")
 		case *slack.ConnectedEvent:
 			log.Println("Infos:", ev.Info)
 			log.Println("Connection counter:", ev.ConnectionCount)
 			rtm.SendMessage(rtm.NewOutgoingMessage("Hello, I'm musicof, let's play !", channelInfos.ID))
-
 		case *slack.MessageEvent:
 			log.Printf("Message: %v\n", ev)
+		default:
+			log.Printf("Unexpected: %s : %v\n", msg.Type, msg.Data)
 		}
 	}
 
