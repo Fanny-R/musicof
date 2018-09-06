@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 
@@ -35,23 +36,52 @@ func main() {
 	rtm := client.NewRTM()
 	go rtm.ManageConnection()
 
-	for msg := range rtm.IncomingEvents {
-		logger.Println("Message received", msg.Type)
-		switch ev := msg.Data.(type) {
-		case *slack.ConnectingEvent:
-			logger.Println("Connecting...", ev.Attempt)
-		case *slack.ConnectionErrorEvent:
-			logger.Fatalln("Connection error,  exiting. Reason: ", ev.Error())
-		case *slack.InvalidAuthEvent:
-			logger.Fatalln("Invalid credentials")
-		case *slack.HelloEvent:
-			logger.Println("Received hello, sending greetings !")
-			rtm.SendMessage(rtm.NewOutgoingMessage("Hello, I'm musicof, let's play !", channelInfos.ID))
-		case *slack.ConnectedEvent:
-			logger.Println("Connected !")
-		case *slack.MessageEvent:
-			logger.Printf("Message: %v\n", ev)
+	handler := slackHandler{
+		client:  rtm,
+		logger:  logger,
+		channel: channelInfos,
+	}
+
+	for evt := range rtm.IncomingEvents {
+		if err := handler.handleEvent(evt); err != nil {
+			logger.Fatal(err)
+		}
+	}
+}
+
+type slackHandler struct {
+	client  *slack.RTM
+	logger  *log.Logger
+	channel *slack.Channel
+}
+
+func (s *slackHandler) handleEvent(msg slack.RTMEvent) error {
+	switch ev := msg.Data.(type) {
+	case *slack.ConnectingEvent:
+		s.logger.Println("Connecting...", ev.Attempt)
+	case *slack.ConnectionErrorEvent:
+		return ev
+	case *slack.InvalidAuthEvent:
+		return errors.New("Invalid auth received")
+	case *slack.HelloEvent:
+		s.logger.Println("Received hello, sending greetings !")
+		s.client.SendMessage(s.client.NewOutgoingMessage("Hello, I'm musicof, let's play !", s.channel.ID))
+	case *slack.ConnectedEvent:
+		s.logger.Println("Connected !")
+	case *slack.MessageEvent:
+		if err := s.handleMessage(ev); err != nil {
+			return err
 		}
 	}
 
+	return nil
+
+}
+
+func (s *slackHandler) handleMessage(ev *slack.MessageEvent) error {
+	if ev.User == "UCFHSPQUC" {
+		s.client.SendMessage(s.client.NewOutgoingMessage("Damnit mooon moon !", s.channel.ID))
+	}
+
+	return nil
 }
