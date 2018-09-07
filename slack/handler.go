@@ -3,6 +3,7 @@ package slack
 import (
 	"errors"
 	"log"
+	"strings"
 
 	"github.com/nlopes/slack"
 )
@@ -13,7 +14,6 @@ type Bot interface {
 }
 
 type rtmBot struct {
-	slack   *slack.Client
 	rtm     *slack.RTM
 	channel *slack.Channel
 
@@ -38,7 +38,6 @@ func NewRTMBot(token, channelID string, logger *log.Logger) (Bot, error) {
 	go rtm.ManageConnection()
 
 	bot := rtmBot{
-		slack:   client,
 		rtm:     rtm,
 		channel: channel,
 		halt:    make(chan chan error),
@@ -93,7 +92,6 @@ func (r *rtmBot) handleEvent(msg slack.RTMEvent) error {
 	}
 
 	return nil
-
 }
 
 func (r *rtmBot) handleHalt() {
@@ -101,7 +99,19 @@ func (r *rtmBot) handleHalt() {
 }
 
 func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
-	// TODO write something interesting
+	if ev.Channel != r.channel.ID {
+		return nil
+	}
+
+	if !strings.Contains(ev.Text, r.rtm.GetInfo().User.ID) {
+		return nil
+	}
+
+	if !strings.Contains(ev.Text, "nominate") {
+		return nil
+	}
+
+	r.rtm.SendMessage(r.rtm.NewOutgoingMessage("wesh wesh", r.channel.ID))
 
 	return nil
 }
