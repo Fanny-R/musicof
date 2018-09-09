@@ -3,6 +3,7 @@ package slack
 import (
 	"errors"
 	"log"
+	"math/rand"
 	"strings"
 
 	"github.com/nlopes/slack"
@@ -87,6 +88,7 @@ func (r *rtmBot) handleEvent(msg slack.RTMEvent) error {
 		r.logger.Println("Connected !")
 	case *slack.MessageEvent:
 		if err := r.handleMessage(ev); err != nil {
+			r.logger.Println("Failed to handle message, reason :", err)
 			return err
 		}
 	}
@@ -111,7 +113,23 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 		return nil
 	}
 
-	r.rtm.SendMessage(r.rtm.NewOutgoingMessage("wesh wesh", r.channel.ID))
+	usersInConversationParameters := &slack.GetUsersInConversationParameters{ChannelID: r.channel.ID}
 
-	return nil
+	userIDs, _, err := r.rtm.GetUsersInConversation(usersInConversationParameters)
+
+	if err != nil {
+		return err
+	}
+
+	userID := userIDs[rand.Intn(len(userIDs))]
+
+	user, err := r.rtm.GetUserInfo(userID)
+
+	if err != nil {
+		return err
+	}
+
+	_, _, err = r.rtm.PostMessage(r.channel.ID, "@"+user.Name, slack.PostMessageParameters{LinkNames: 1})
+
+	return err
 }
