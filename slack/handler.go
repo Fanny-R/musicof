@@ -110,6 +110,10 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 		return nil
 	}
 
+	return r.handleNominate()
+}
+
+func (r *rtmBot) handleNominate() error {
 	usersInConversationParameters := &slack.GetUsersInConversationParameters{ChannelID: r.channel.ID}
 
 	userIDs, _, err := r.rtm.GetUsersInConversation(usersInConversationParameters)
