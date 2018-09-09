@@ -58,18 +58,14 @@ func (r *rtmBot) Stop() error {
 }
 
 func (r *rtmBot) loop() {
-	var err error
-
 	for {
 		select {
 		case evt := <-r.rtm.IncomingEvents:
-			err = r.handleEvent(evt)
+			r.handleEvent(evt)
 		case res := <-r.halt:
-			r.handleHalt()
-			res <- err
+			res <- r.handleHalt()
 			return
 		}
-
 	}
 }
 
@@ -96,8 +92,9 @@ func (r *rtmBot) handleEvent(msg slack.RTMEvent) error {
 	return nil
 }
 
-func (r *rtmBot) handleHalt() {
+func (r *rtmBot) handleHalt() error {
 	r.rtm.PostMessage(r.channel.ID, "See you later !", slack.PostMessageParameters{})
+	return r.rtm.Disconnect()
 }
 
 func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
