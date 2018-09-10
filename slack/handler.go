@@ -114,9 +114,6 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 }
 
 func (r *rtmBot) handleNominate(callerID string) error {
-	botID := r.rtm.GetInfo().User.ID
-	unwantedIDs := []string{botID, callerID}
-
 	usersInConversationParameters := &slack.GetUsersInConversationParameters{ChannelID: r.channel.ID}
 	userIDs, _, err := r.rtm.GetUsersInConversation(usersInConversationParameters)
 
@@ -124,7 +121,8 @@ func (r *rtmBot) handleNominate(callerID string) error {
 		return err
 	}
 
-	userIDs = remove(userIDs, unwantedIDs)
+	botID := r.rtm.GetInfo().User.ID
+	userIDs = remove(userIDs, botID, callerID)
 
 	userID := userIDs[rand.Intn(len(userIDs))]
 
@@ -139,7 +137,7 @@ func (r *rtmBot) handleNominate(callerID string) error {
 	return err
 }
 
-func remove(s []string, r []string) []string {
+func remove(s []string, r ...string) []string {
 	for i := 0; i < len(s); i++ {
 		if find(s[i], r) {
 			s = append(s[:i], s[i+1:]...)
