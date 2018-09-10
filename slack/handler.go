@@ -110,17 +110,21 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 		return nil
 	}
 
-	return r.handleNominate()
+	return r.handleNominate(ev.User)
 }
 
-func (r *rtmBot) handleNominate() error {
-	usersInConversationParameters := &slack.GetUsersInConversationParameters{ChannelID: r.channel.ID}
+func (r *rtmBot) handleNominate(callerID string) error {
+	botID := r.rtm.GetInfo().User.ID
+	unwantedIDs := []string{botID, callerID}
 
+	usersInConversationParameters := &slack.GetUsersInConversationParameters{ChannelID: r.channel.ID}
 	userIDs, _, err := r.rtm.GetUsersInConversation(usersInConversationParameters)
 
 	if err != nil {
 		return err
 	}
+
+	userIDs = remove(userIDs, unwantedIDs)
 
 	userID := userIDs[rand.Intn(len(userIDs))]
 
@@ -133,4 +137,25 @@ func (r *rtmBot) handleNominate() error {
 	_, _, err = r.rtm.PostMessage(r.channel.ID, "@"+user.Name, slack.PostMessageParameters{LinkNames: 1})
 
 	return err
+}
+
+func remove(s []string, r []string) []string {
+	for i := 0; i < len(s); i++ {
+		if find(s[i], r) {
+			s = append(s[:i], s[i+1:]...)
+			i--
+		}
+	}
+
+	return s
+}
+
+func find(n string, h []string) bool {
+	for _, v := range h {
+		if v == n {
+			return true
+		}
+	}
+
+	return false
 }
