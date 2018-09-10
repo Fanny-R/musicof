@@ -137,15 +137,17 @@ func (r *rtmBot) handleNominate(callerID string) error {
 	return err
 }
 
-func filter(s []string, r ...string) []string {
-	for i := 0; i < len(s); i++ {
-		if find(s[i], r) {
-			s = append(s[:i], s[i+1:]...)
-			i--
+func filter(in []string, excludedValues ...string) []string {
+	var res []string
+	for _, value := range in {
+		if find(value, excludedValues) {
+			continue
 		}
+
+		res = append(res, value)
 	}
 
-	return s
+	return res
 }
 
 func find(n string, h []string) bool {
