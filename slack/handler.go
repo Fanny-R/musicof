@@ -122,7 +122,7 @@ func (r *rtmBot) handleNominate(callerID string) error {
 	}
 
 	botID := r.rtm.GetInfo().User.ID
-	userIDs = remove(userIDs, botID, callerID)
+	userIDs = filter(userIDs, botID, callerID)
 
 	userID := userIDs[rand.Intn(len(userIDs))]
 
@@ -137,7 +137,7 @@ func (r *rtmBot) handleNominate(callerID string) error {
 	return err
 }
 
-func remove(s []string, r ...string) []string {
+func filter(s []string, r ...string) []string {
 	for i := 0; i < len(s); i++ {
 		if find(s[i], r) {
 			s = append(s[:i], s[i+1:]...)
