@@ -1,4 +1,4 @@
-module github.com/jlevesy/musicof
+module github.com/Fanny-R/musicof
 
 require (
 	github.com/gorilla/websocket v1.4.0 // indirect
