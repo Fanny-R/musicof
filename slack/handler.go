@@ -114,9 +114,9 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 }
 
 func (r *rtmBot) handleNominate(callerID string) error {
-	usersInConversationParameters := &slack.GetUsersInConversationParameters{ChannelID: r.channel.ID}
-	userIDs, _, err := r.rtm.GetUsersInConversation(usersInConversationParameters)
-
+	userIDs, _, err := r.rtm.GetUsersInConversation(
+		&slack.GetUsersInConversationParameters{ChannelID: r.channel.ID},
+	)
 	if err != nil {
 		return err
 	}
