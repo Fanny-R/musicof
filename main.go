@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/jlevesy/musicof/slack"
+	"github.com/Fanny-R/musicof/slack"
 )
 
 func main() {
