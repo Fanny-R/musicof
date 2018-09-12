@@ -1,7 +1,7 @@
 package slack
 
 func filter(in []string, excludedValues ...string) []string {
-	var res []string
+	res := make([]string, 0, len(in))
 	for _, value := range in {
 		if find(value, excludedValues) {
 			continue
