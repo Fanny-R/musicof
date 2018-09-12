@@ -6,5 +6,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' -o mus
 
 FROM scratch AS run
 COPY --from=build /go/musicof/musicof /musicof
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD ["/musicof"]
