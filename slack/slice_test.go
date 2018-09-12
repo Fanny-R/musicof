@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -19,5 +20,17 @@ func TestFindReturnsFalseWhenSliceDoesNotContainGivenString(t *testing.T) {
 
 	if find(n, h) != false {
 		t.Errorf("Expected false, got true when finding %s in %s", n, h)
+	}
+}
+
+func TestFilterReturnsANewSliceWithoutTheExcludedVAlues(t *testing.T) {
+	in := []string{"Simularbre", "Caninos", "Noctali", "Gobou"}
+	excludedValues := "Caninos"
+
+	expectedResult := []string{"Simularbre", "Noctali", "Gobou"}
+	result := filter(in, excludedValues)
+
+	if reflect.DeepEqual(result, expectedResult) != true {
+		t.Errorf("Expected %s, got %s", expectedResult, result)
 	}
 }
