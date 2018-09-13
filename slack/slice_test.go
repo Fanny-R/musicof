@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestFindChecksThePresenceOfTheGivenArgument(t *testing.T) {
+func TestContainsChecksThePresenceOfTheGivenArgument(t *testing.T) {
 	cases := []struct {
 		label       string
 		n           string
@@ -52,9 +52,9 @@ func TestFindChecksThePresenceOfTheGivenArgument(t *testing.T) {
 
 	for _, testCase := range cases {
 		t.Run(testCase.label, func(t *testing.T) {
-			result := find(testCase.n, testCase.h)
+			result := contains(testCase.n, testCase.h)
 			if result != testCase.expectation {
-				t.Errorf("Expected %t, got %t when finding %s in %s", testCase.expectation, result, testCase.n, testCase.h)
+				t.Errorf("Expected %t, got %t when checking if %s contains %s", testCase.expectation, result, testCase.h, testCase.n)
 			}
 		})
 	}

@@ -3,7 +3,7 @@ package slack
 func filter(in []string, excludedValues ...string) []string {
 	res := make([]string, 0, len(in))
 	for _, value := range in {
-		if find(value, excludedValues) {
+		if contains(value, excludedValues) {
 			continue
 		}
 
@@ -13,7 +13,7 @@ func filter(in []string, excludedValues ...string) []string {
 	return res
 }
 
-func find(n string, h []string) bool {
+func contains(n string, h []string) bool {
 	for _, v := range h {
 		if v == n {
 			return true
