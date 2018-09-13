@@ -5,37 +5,58 @@ import (
 	"testing"
 )
 
-func TestFindReturnsTrueWhenSliceContainsGivenString(t *testing.T) {
+func TestFindChecksThePresenceOfTheGivenArgument(t *testing.T) {
 	cases := []struct {
-		n string
-		h []string
+		label       string
+		n           string
+		h           []string
+		expectation bool
 	}{
-		{"Caninos", []string{"Simularbre", "Caninos", "Noctali", "Gobou"}},
-		{"Caninos", []string{"Caninos"}},
+		{
+			"When the slice contains multiple strings including the given string",
+			"Caninos",
+			[]string{"Simularbre", "Caninos", "Noctali", "Gobou"},
+			true,
+		},
+		{
+			"When the slice contains only the given string",
+			"Caninos",
+			[]string{"Caninos"},
+			true,
+		},
+		{
+			"When the slice contains multiple strings but not the given string",
+			"Balignon",
+			[]string{"Simularbre", "Caninos", "Noctali", "Gobou"},
+			false,
+		},
+		{
+			"When the slice is empty and a string is given",
+			"Caninos",
+			[]string{},
+			false,
+		},
+		{
+			"When the slice contains multiple strings and an empty string is given",
+			"",
+			[]string{"Simularbre", "Caninos", "Noctali", "Gobou"},
+			false,
+		},
+		{
+			"When the slice is empty and an empty string is given",
+			"",
+			[]string{},
+			false,
+		},
 	}
 
 	for _, testCase := range cases {
-		if find(testCase.n, testCase.h) != true {
-			t.Errorf("Expected true, got false when finding %s in %s", testCase.n, testCase.h)
-		}
-	}
-}
-
-func TestFindReturnsFalseWhenSliceDoesNotContainGivenString(t *testing.T) {
-	cases := []struct {
-		n string
-		h []string
-	}{
-		{"Balignon", []string{"Simularbre", "Caninos", "Noctali", "Gobou"}},
-		{"Balignon", []string{}},
-		{"Balignon", []string{"Caninos"}},
-		{"", []string{"Simularbre", "Caninos", "Noctali", "Gobou"}},
-	}
-
-	for _, testCase := range cases {
-		if find(testCase.n, testCase.h) != false {
-			t.Errorf("Expected false, got true when finding %s in %s", testCase.n, testCase.h)
-		}
+		t.Run(testCase.label, func(t *testing.T) {
+			result := find(testCase.n, testCase.h)
+			if result != testCase.expectation {
+				t.Errorf("Expected %t, got %t when finding %s in %s", testCase.expectation, result, testCase.n, testCase.h)
+			}
+		})
 	}
 }
 
@@ -43,7 +64,7 @@ func TestFilterReturnsANewSliceWithoutTheExcludedVAlues(t *testing.T) {
 	cases := []struct {
 		in             []string
 		excludedValues []string
-		expectedResult []string
+		expectation    []string
 	}{
 		{
 			[]string{"Simularbre", "Caninos", "Noctali", "Gobou"},
@@ -80,8 +101,8 @@ func TestFilterReturnsANewSliceWithoutTheExcludedVAlues(t *testing.T) {
 	for _, testCase := range cases {
 		result := filter(testCase.in, testCase.excludedValues...)
 
-		if reflect.DeepEqual(result, testCase.expectedResult) != true {
-			t.Errorf("Expected %s, got %s", testCase.expectedResult, result)
+		if !reflect.DeepEqual(result, testCase.expectation) {
+			t.Errorf("Expected %s, got %s", testCase.expectation, result)
 		}
 	}
 }
