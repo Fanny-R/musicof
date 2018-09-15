@@ -60,23 +60,27 @@ func TestContainsChecksThePresenceOfTheGivenArgument(t *testing.T) {
 	}
 }
 
-func TestFilterReturnsANewSliceWithoutTheExcludedVAlues(t *testing.T) {
+func TestFilterReturnsANewSliceWithoutTheExcludedValues(t *testing.T) {
 	cases := []struct {
+		label          string
 		in             []string
 		excludedValues []string
 		expectation    []string
 	}{
 		{
+			"When the slice contains multiple string and one contained string is given",
 			[]string{"Simularbre", "Caninos", "Noctali", "Gobou"},
 			[]string{"Caninos"},
 			[]string{"Simularbre", "Noctali", "Gobou"},
 		},
 		{
+			"When the slice contains only the given string",
 			[]string{"Caninos"},
 			[]string{"Caninos"},
 			[]string{},
 		},
 		{
+			"When the slice contains multiple strings and contained strings are given",
 			[]string{"Simularbre", "Noctali", "Caninos", "Gobou"},
 			[]string{"Caninos", "Noctali"},
 			[]string{"Simularbre", "Gobou"},
@@ -87,11 +91,13 @@ func TestFilterReturnsANewSliceWithoutTheExcludedVAlues(t *testing.T) {
 			[]string{"Simularbre", "Noctali", "Gobou"},
 		},
 		{
+			"When the slice contains multiple strings and an uncontained string is given",
 			[]string{"Simularbre", "Noctali", "Gobou"},
 			[]string{"Caninos"},
 			[]string{"Simularbre", "Noctali", "Gobou"},
 		},
 		{
+			"When the slice contains multiple strings and no strings are given",
 			[]string{"Simularbre", "Noctali", "Gobou"},
 			[]string{},
 			[]string{"Simularbre", "Noctali", "Gobou"},
@@ -99,10 +105,12 @@ func TestFilterReturnsANewSliceWithoutTheExcludedVAlues(t *testing.T) {
 	}
 
 	for _, testCase := range cases {
-		result := filter(testCase.in, testCase.excludedValues...)
+		t.Run(testCase.label, func(t *testing.T) {
+			result := filter(testCase.in, testCase.excludedValues...)
 
-		if !reflect.DeepEqual(result, testCase.expectation) {
-			t.Errorf("Expected %s, got %s", testCase.expectation, result)
-		}
+			if !reflect.DeepEqual(result, testCase.expectation) {
+				t.Errorf("Expected %s, got %s", testCase.expectation, result)
+			}
+		})
 	}
 }
