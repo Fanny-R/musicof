@@ -86,6 +86,7 @@ func TestFilterReturnsANewSliceWithoutTheExcludedValues(t *testing.T) {
 			[]string{"Simularbre", "Gobou"},
 		},
 		{
+			"When the slice contains multiple strings and both a contained and an uncontained string is given",
 			[]string{"Simularbre", "Caninos", "Noctali", "Gobou"},
 			[]string{"Caninos", "Évoli"},
 			[]string{"Simularbre", "Noctali", "Gobou"},
