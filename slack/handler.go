@@ -78,8 +78,7 @@ func (r *rtmBot) handleEvent(msg slack.RTMEvent) error {
 	case *slack.InvalidAuthEvent:
 		return errors.New("Invalid auth received")
 	case *slack.HelloEvent:
-		r.logger.Println("Received hello, sending greetings !")
-		r.rtm.PostMessage(r.channel.ID, "Hello, I'm musicof, let's play !", slack.PostMessageParameters{})
+		r.logger.Println("Received hello")
 	case *slack.ConnectedEvent:
 		r.logger.Println("Connected !")
 	case *slack.MessageEvent:
@@ -93,7 +92,8 @@ func (r *rtmBot) handleEvent(msg slack.RTMEvent) error {
 }
 
 func (r *rtmBot) handleHalt() error {
-	r.rtm.PostMessage(r.channel.ID, "See you later !", slack.PostMessageParameters{})
+	r.logger.Println("Disconnecting...")
+
 	return r.rtm.Disconnect()
 }
 
