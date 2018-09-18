@@ -110,11 +110,29 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 		return nil
 	}
 
-	if !strings.Contains(ev.Text, "nominate") {
-		return nil
+	if strings.Contains(ev.Text, "nominate") {
+		return r.handleNominate(ev.User)
 	}
 
-	return r.handleNominate(ev.User)
+	if strings.Contains(ev.Text, "help") {
+		return r.handleHelp()
+	}
+
+	return nil
+
+}
+
+func (r *rtmBot) handleHelp() error {
+	_, _, err := r.rtm.PostMessage(
+		r.channel.ID,
+		"Use `@"+r.rtm.GetInfo().User.Name+" nominate` to nominate someone",
+		slack.PostMessageParameters{
+			LinkNames: 1,
+			Markdown:  true,
+		},
+	)
+
+	return err
 }
 
 func (r *rtmBot) handleNominate(callerID string) error {
