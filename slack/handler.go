@@ -102,6 +102,10 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 		return nil
 	}
 
+	if ev.BotID != "" {
+		return nil
+	}
+
 	if !strings.Contains(ev.Text, r.rtm.GetInfo().User.ID) {
 		return nil
 	}
