@@ -78,8 +78,7 @@ func (r *rtmBot) handleEvent(msg slack.RTMEvent) error {
 	case *slack.InvalidAuthEvent:
 		return errors.New("Invalid auth received")
 	case *slack.HelloEvent:
-		r.logger.Println("Received hello, sending greetings !")
-		r.rtm.PostMessage(r.channel.ID, "Hello, I'm musicof, let's play !", slack.PostMessageParameters{})
+		r.logger.Println("Received hello")
 	case *slack.ConnectedEvent:
 		r.logger.Println("Connected !")
 	case *slack.MessageEvent:
@@ -93,7 +92,8 @@ func (r *rtmBot) handleEvent(msg slack.RTMEvent) error {
 }
 
 func (r *rtmBot) handleHalt() error {
-	r.rtm.PostMessage(r.channel.ID, "See you later !", slack.PostMessageParameters{})
+	r.logger.Println("Disconnecting...")
+
 	return r.rtm.Disconnect()
 }
 
@@ -102,15 +102,37 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 		return nil
 	}
 
+	if ev.BotID != "" {
+		return nil
+	}
+
 	if !strings.Contains(ev.Text, r.rtm.GetInfo().User.ID) {
 		return nil
 	}
 
-	if !strings.Contains(ev.Text, "nominate") {
-		return nil
+	if strings.Contains(ev.Text, "nominate") {
+		return r.handleNominate(ev.User)
 	}
 
-	return r.handleNominate(ev.User)
+	if strings.Contains(ev.Text, "help") {
+		return r.handleHelp()
+	}
+
+	return nil
+
+}
+
+func (r *rtmBot) handleHelp() error {
+	_, _, err := r.rtm.PostMessage(
+		r.channel.ID,
+		"Use `@"+r.rtm.GetInfo().User.Name+" nominate` to nominate someone",
+		slack.PostMessageParameters{
+			LinkNames: 1,
+			Markdown:  true,
+		},
+	)
+
+	return err
 }
 
 func (r *rtmBot) handleNominate(callerID string) error {
