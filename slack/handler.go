@@ -14,9 +14,21 @@ type Bot interface {
 	Stop() error
 }
 
+type rtmClient interface {
+	GetUsersInConversation(params *slack.GetUsersInConversationParameters) ([]string, string, error)
+	GetInfo() *slack.Info
+	GetUserInfo(user string) (*slack.User, error)
+
+	PostMessage(channel, text string, params slack.PostMessageParameters) (string, string, error)
+
+	Disconnect() error
+}
+
 type rtmBot struct {
-	rtm     *slack.RTM
+	rtm     rtmClient
 	channel *slack.Channel
+
+	incomingEvents <-chan slack.RTMEvent
 
 	halt chan chan error
 
@@ -39,10 +51,11 @@ func NewRTMBot(token, channelID string, logger *log.Logger) (Bot, error) {
 	go rtm.ManageConnection()
 
 	bot := rtmBot{
-		rtm:     rtm,
-		channel: channel,
-		halt:    make(chan chan error),
-		logger:  logger,
+		rtm:            rtm,
+		incomingEvents: rtm.IncomingEvents,
+		channel:        channel,
+		halt:           make(chan chan error),
+		logger:         logger,
 	}
 
 	go bot.loop()
@@ -60,7 +73,7 @@ func (r *rtmBot) Stop() error {
 func (r *rtmBot) loop() {
 	for {
 		select {
-		case evt := <-r.rtm.IncomingEvents:
+		case evt := <-r.incomingEvents:
 			r.handleEvent(evt)
 		case res := <-r.halt:
 			res <- r.handleHalt()
