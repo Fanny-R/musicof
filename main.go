@@ -18,13 +18,7 @@ func main() {
 		logger.Fatal("Please define MUSICOF_SLACK_TOKEN")
 	}
 
-	channel := os.Getenv("MUSICOF_SLACK_CHANNEL")
-
-	if channel == "" {
-		logger.Fatal("Please define a room to use using MUSICOF_SLACK_CHANNEL")
-	}
-
-	bot, err := slack.NewRTMBot(token, channel, logger)
+	bot, err := slack.NewRTMBot(token, logger)
 
 	if err != nil {
 		logger.Fatal(err)
