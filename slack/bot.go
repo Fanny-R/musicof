@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/nlopes/slack"
 )
@@ -24,9 +25,14 @@ type rtmClient interface {
 	Disconnect() error
 }
 
+type intGenerator interface {
+	Intn(n int) int
+}
+
 type rtmBot struct {
 	rtm     rtmClient
 	channel *slack.Channel
+	gen     intGenerator
 
 	incomingEvents <-chan slack.RTMEvent
 
@@ -56,6 +62,7 @@ func NewRTMBot(token, channelID string, logger *log.Logger) (Bot, error) {
 		channel:        channel,
 		halt:           make(chan chan error),
 		logger:         logger,
+		gen:            rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 
 	go bot.loop()
@@ -159,7 +166,7 @@ func (r *rtmBot) handleNominate(callerID string) error {
 	botID := r.rtm.GetInfo().User.ID
 	userIDs = filter(userIDs, botID, callerID)
 
-	userID := userIDs[rand.Intn(len(userIDs))]
+	userID := userIDs[r.gen.Intn(len(userIDs))]
 
 	user, err := r.rtm.GetUserInfo(userID)
 
