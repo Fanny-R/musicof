@@ -42,29 +42,18 @@ type rtmBot struct {
 }
 
 // NewRTMBot builds an RTM bot
-func NewRTMBot(token, channelID string, logger *log.Logger) (Bot, error) {
-	client := slack.New(token)
-
-	channel, err := client.GetChannelInfo(channelID)
-
-	if err != nil {
-		return nil, err
-	}
-
-	logger.Println("Starting the musicof game in :", channel.Name)
-
-	rtm := client.NewRTM()
-	go rtm.ManageConnection()
+func NewRTMBot(token string, logger *log.Logger) (Bot, error) {
+	rtm := slack.New(token).NewRTM()
 
 	bot := rtmBot{
 		rtm:            rtm,
 		incomingEvents: rtm.IncomingEvents,
-		channel:        channel,
 		halt:           make(chan chan error),
 		logger:         logger,
 		gen:            rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 
+	go rtm.ManageConnection()
 	go bot.loop()
 
 	return &bot, nil
@@ -118,10 +107,6 @@ func (r *rtmBot) handleHalt() error {
 }
 
 func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
-	if ev.Channel != r.channel.ID {
-		return nil
-	}
-
 	if ev.BotID != "" {
 		return nil
 	}
@@ -131,20 +116,20 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 	}
 
 	if strings.Contains(ev.Text, "nominate") {
-		return r.handleNominate(ev.User)
+		return r.handleNominate(ev.User, ev.Channel)
 	}
 
 	if strings.Contains(ev.Text, "help") {
-		return r.handleHelp()
+		return r.handleHelp(ev.Channel)
 	}
 
 	return nil
 
 }
 
-func (r *rtmBot) handleHelp() error {
+func (r *rtmBot) handleHelp(channelID string) error {
 	_, _, err := r.rtm.PostMessage(
-		r.channel.ID,
+		channelID,
 		"Use `@"+r.rtm.GetInfo().User.Name+" nominate` to nominate someone",
 		slack.PostMessageParameters{
 			LinkNames: 1,
@@ -155,9 +140,9 @@ func (r *rtmBot) handleHelp() error {
 	return err
 }
 
-func (r *rtmBot) handleNominate(callerID string) error {
+func (r *rtmBot) handleNominate(callerID, channelID string) error {
 	userIDs, _, err := r.rtm.GetUsersInConversation(
-		&slack.GetUsersInConversationParameters{ChannelID: r.channel.ID},
+		&slack.GetUsersInConversationParameters{ChannelID: channelID},
 	)
 	if err != nil {
 		return err
@@ -167,7 +152,7 @@ func (r *rtmBot) handleNominate(callerID string) error {
 	userIDs = filter(userIDs, botID, callerID)
 
 	if len(userIDs) == 0 {
-		_, _, err = r.rtm.PostMessage(r.channel.ID, "Nobody to nominate ¯\\_(ツ)_/¯", slack.PostMessageParameters{})
+		_, _, err = r.rtm.PostMessage(channelID, "Nobody to nominate ¯\\_(ツ)_/¯", slack.PostMessageParameters{})
 
 		return err
 	}
@@ -180,7 +165,7 @@ func (r *rtmBot) handleNominate(callerID string) error {
 		return err
 	}
 
-	_, _, err = r.rtm.PostMessage(r.channel.ID, "@"+user.Name, slack.PostMessageParameters{LinkNames: 1})
+	_, _, err = r.rtm.PostMessage(channelID, "@"+user.Name, slack.PostMessageParameters{LinkNames: 1})
 
 	return err
 }
