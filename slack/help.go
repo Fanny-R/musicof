@@ -1,13 +1,19 @@
 package slack
 
 import (
+	"fmt"
+
 	"github.com/nlopes/slack"
+)
+
+const (
+	helpMessagePattern = "Use `@%s nominate` to nominate someone"
 )
 
 func (r *rtmBot) handleHelp(channelID string) error {
 	_, _, err := r.rtm.PostMessage(
 		channelID,
-		"Use `@"+r.rtm.GetInfo().User.Name+" nominate` to nominate someone",
+		fmt.Sprintf(helpMessagePattern, r.rtm.GetInfo().User.Name),
 		slack.PostMessageParameters{
 			LinkNames: 1,
 			Markdown:  true,
