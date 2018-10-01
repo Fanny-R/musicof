@@ -70,7 +70,9 @@ func (r *rtmBot) loop() {
 	for {
 		select {
 		case evt := <-r.incomingEvents:
-			r.handleEvent(evt)
+			if err := r.handleEvent(evt); err != nil {
+				r.logger.Println("Failed to handle event, got ", err)
+			}
 		case res := <-r.halt:
 			res <- r.handleHalt()
 			return
