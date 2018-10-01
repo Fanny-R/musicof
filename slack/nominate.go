@@ -12,8 +12,7 @@ func (r *rtmBot) handleNominate(callerID, channelID string) error {
 		return err
 	}
 
-	botID := r.rtm.GetInfo().User.ID
-	userIDs = filter(userIDs, botID, callerID)
+	userIDs = filter(userIDs, r.rtm.GetInfo().User.ID, callerID)
 
 	if len(userIDs) == 0 {
 		_, _, err = r.rtm.PostMessage(channelID, "Nobody to nominate ¯\\_(ツ)_/¯", slack.PostMessageParameters{})
