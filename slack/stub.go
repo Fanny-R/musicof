@@ -31,3 +31,11 @@ func (f *fakeRtmClient) PostMessage(channel, text string, params slack.PostMessa
 func (f *fakeRtmClient) Disconnect() error {
 	return f.DisconnectHandler()
 }
+
+type fakeIntGenerator struct {
+	IntnHandler func(int) int
+}
+
+func (f *fakeIntGenerator) Intn(maxVal int) int {
+	return f.IntnHandler(maxVal)
+}
