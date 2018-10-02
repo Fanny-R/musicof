@@ -11,12 +11,11 @@ jobs:
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
       - checkout
-      - run: go test -v ./...
+      - run: make test
       - setup_remote_docker
       - run:
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              docker build -t fannyrottee/musicof .
               docker login -u $DOCKER_USER -p $DOCKER_PASS
-              docker push fannyrottee/musicof
+              make publish_package
             fi
