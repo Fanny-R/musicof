@@ -19,8 +19,8 @@ func TestHandleNominateFailsIfItCannotFetchUsersInConversation(t *testing.T) {
 	)
 
 	fakeClient := &fakeRtmClient{
-		GetUsersInConversationHandler: func(q *slack.GetUsersInConversationParameters) ([]string, string, error) {
-			userInConversationParameters = q
+		GetUsersInConversationHandler: func(params *slack.GetUsersInConversationParameters) ([]string, string, error) {
+			userInConversationParameters = params
 			return []string{}, "", errors.New("Nope")
 		},
 	}
@@ -37,13 +37,13 @@ func TestHandleNominateFailsIfItCannotFetchUsersInConversation(t *testing.T) {
 	}
 
 	if userInConversationParameters.ChannelID != channel {
-		t.Error("Expected to ask user in conversation for the right channel")
+		t.Errorf("Expected to ask user in conversation for the channel %s, got %s", channel, userInConversationParameters.ChannelID)
 	}
 }
 
-func TestHandleNominateNotifiesWhenTheresNobodyToNominate(t *testing.T) {
+func TestHandleNominateNotifiesWhenThereIsNobodyToNominate(t *testing.T) {
 	var (
-		userInConversation = []string{}
+		usersInConversation = []string{}
 
 		sentChannel string
 		sentMessage string
@@ -53,11 +53,11 @@ func TestHandleNominateNotifiesWhenTheresNobodyToNominate(t *testing.T) {
 		caller  = "caller"
 	)
 
-	userInConversation = append(userInConversation, botID)
+	usersInConversation = append(usersInConversation, botID)
 
 	fakeClient := &fakeRtmClient{
 		GetUsersInConversationHandler: func(q *slack.GetUsersInConversationParameters) ([]string, string, error) {
-			return userInConversation, "", nil
+			return usersInConversation, "", nil
 		},
 		PostMessageHandler: func(channel string, message string, params slack.PostMessageParameters) (string, string, error) {
 			sentChannel = channel
@@ -85,13 +85,13 @@ func TestHandleNominateNotifiesWhenTheresNobodyToNominate(t *testing.T) {
 	}
 
 	if !strings.Contains(sentMessage, "Nobody to nominate") {
-		t.Error("Expected sent message to inform that nobody can be nominated")
+		t.Errorf("Expected sent message to inform that nobody can be nominated, got %s", sentMessage)
 	}
 }
 
-func TestHandleNominateFetchesNominatedUserInformationsAndFailsOnError(t *testing.T) {
+func TestHandleNominateFetchesNominatedUserInformationAndFailsOnError(t *testing.T) {
 	var (
-		userInConversation = []string{"a", "b", "c"}
+		usersInConversation = []string{"a", "b", "c"}
 
 		genMaxValue int
 		askedUserID string
@@ -101,11 +101,11 @@ func TestHandleNominateFetchesNominatedUserInformationsAndFailsOnError(t *testin
 		caller  = "caller"
 	)
 
-	userInConversation = append(userInConversation, botID)
+	usersInConversation = append(usersInConversation, botID)
 
 	fakeClient := &fakeRtmClient{
 		GetUsersInConversationHandler: func(q *slack.GetUsersInConversationParameters) ([]string, string, error) {
-			return userInConversation, "", nil
+			return usersInConversation, "", nil
 		},
 		GetInfoHandler: func() *slack.Info {
 			return &slack.Info{User: &slack.UserDetails{ID: botID}}
@@ -135,8 +135,8 @@ func TestHandleNominateFetchesNominatedUserInformationsAndFailsOnError(t *testin
 		t.Fatal("Expected an error, got nothing")
 	}
 
-	if genMaxValue != len(userInConversation)-1 {
-		t.Error("Supposed to ask to generator a max value equals to the length of the user in conversation got", genMaxValue)
+	if genMaxValue != len(usersInConversation)-1 {
+		t.Errorf("Supposed to ask to generator with a max value equals to %d of the user in conversation got %d", len(usersInConversation)-1, genMaxValue)
 	}
 
 	if askedUserID != "a" {
@@ -146,7 +146,7 @@ func TestHandleNominateFetchesNominatedUserInformationsAndFailsOnError(t *testin
 
 func TestHandleNominateNotifiesNominatedUser(t *testing.T) {
 	var (
-		userInConversation = []string{"a", "b", "c"}
+		usersInConversation = []string{"a", "b", "c"}
 
 		selectedUserName = "michel"
 		sentChannel      string
@@ -157,11 +157,11 @@ func TestHandleNominateNotifiesNominatedUser(t *testing.T) {
 		caller  = "caller"
 	)
 
-	userInConversation = append(userInConversation, botID)
+	usersInConversation = append(usersInConversation, botID)
 
 	fakeClient := &fakeRtmClient{
 		GetUsersInConversationHandler: func(q *slack.GetUsersInConversationParameters) ([]string, string, error) {
-			return userInConversation, "", nil
+			return usersInConversation, "", nil
 		},
 		GetInfoHandler: func() *slack.Info {
 			return &slack.Info{User: &slack.UserDetails{ID: botID}}
@@ -199,6 +199,6 @@ func TestHandleNominateNotifiesNominatedUser(t *testing.T) {
 	}
 
 	if !strings.Contains(sentMessage, selectedUserName) {
-		t.Error("Expected sent message to contains nominated user name, got", selectedUserName)
+		t.Errorf("Expected sent message to contain %s, got %s", selectedUserName, sentMessage)
 	}
 }
