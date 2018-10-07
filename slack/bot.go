@@ -30,9 +30,8 @@ type intGenerator interface {
 }
 
 type rtmBot struct {
-	rtm     rtmClient
-	channel *slack.Channel
-	gen     intGenerator
+	rtm rtmClient
+	gen intGenerator
 
 	incomingEvents <-chan slack.RTMEvent
 
