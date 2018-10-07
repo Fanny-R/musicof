@@ -33,6 +33,8 @@ type rtmBot struct {
 	rtm rtmClient
 	gen intGenerator
 
+	lastNominee string
+
 	incomingEvents <-chan slack.RTMEvent
 
 	halt chan chan error
