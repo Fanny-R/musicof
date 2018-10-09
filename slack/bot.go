@@ -70,7 +70,9 @@ func (r *rtmBot) loop() {
 	for {
 		select {
 		case evt := <-r.incomingEvents:
-			r.handleEvent(evt)
+			if err := r.handleEvent(evt); err != nil {
+				r.logger.Println("Failed to handle event, got ", err)
+			}
 		case res := <-r.halt:
 			res <- r.handleHalt()
 			return
@@ -125,47 +127,4 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 
 	return nil
 
-}
-
-func (r *rtmBot) handleHelp(channelID string) error {
-	_, _, err := r.rtm.PostMessage(
-		channelID,
-		"Use `@"+r.rtm.GetInfo().User.Name+" nominate` to nominate someone",
-		slack.PostMessageParameters{
-			LinkNames: 1,
-			Markdown:  true,
-		},
-	)
-
-	return err
-}
-
-func (r *rtmBot) handleNominate(callerID, channelID string) error {
-	userIDs, _, err := r.rtm.GetUsersInConversation(
-		&slack.GetUsersInConversationParameters{ChannelID: channelID},
-	)
-	if err != nil {
-		return err
-	}
-
-	botID := r.rtm.GetInfo().User.ID
-	userIDs = filter(userIDs, botID, callerID)
-
-	if len(userIDs) == 0 {
-		_, _, err = r.rtm.PostMessage(channelID, "Nobody to nominate ¯\\_(ツ)_/¯", slack.PostMessageParameters{})
-
-		return err
-	}
-
-	userID := userIDs[r.gen.Intn(len(userIDs))]
-
-	user, err := r.rtm.GetUserInfo(userID)
-
-	if err != nil {
-		return err
-	}
-
-	_, _, err = r.rtm.PostMessage(channelID, "@"+user.Name, slack.PostMessageParameters{LinkNames: 1})
-
-	return err
 }
