@@ -20,7 +20,9 @@ func (r *rtmBot) handleNominate(callerID, channelID string) error {
 		return err
 	}
 
-	userIDs = filter(userIDs, r.rtm.GetInfo().User.ID, callerID, r.lastNominee)
+	excludedUsersIDs := append([]string{r.rtm.GetInfo().User.ID, callerID}, r.lastNominees...)
+
+	userIDs = filter(userIDs, excludedUsersIDs...)
 
 	if len(userIDs) == 0 {
 		_, _, err = r.rtm.PostMessage(channelID, nobodyToNominateMsg, slack.PostMessageParameters{})
@@ -36,8 +38,9 @@ func (r *rtmBot) handleNominate(callerID, channelID string) error {
 		return err
 	}
 
+	r.lastNominees.Push(userID)
+
 	_, _, err = r.rtm.PostMessage(channelID, fmt.Sprintf(nominateMsg, user.Name), slack.PostMessageParameters{LinkNames: 1})
 
-	r.lastNominee = userID
 	return err
 }
