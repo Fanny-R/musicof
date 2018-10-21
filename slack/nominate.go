@@ -38,7 +38,7 @@ func (r *rtmBot) handleNominate(callerID, channelID string) error {
 		return err
 	}
 
-	r.lastNominees.Push(userID)
+	r.lastNominees.Push(userID, r.lastNomineesMaxLength)
 
 	_, _, err = r.rtm.PostMessage(channelID, fmt.Sprintf(nominateMsg, user.Name), slack.PostMessageParameters{LinkNames: 1})
 
