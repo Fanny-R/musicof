@@ -33,8 +33,7 @@ type rtmBot struct {
 	rtm rtmClient
 	gen intGenerator
 
-	lastNominees          nominees
-	lastNomineesMaxLength int
+	lastNominees nominees
 
 	incomingEvents <-chan slack.RTMEvent
 
@@ -47,14 +46,18 @@ type rtmBot struct {
 func NewRTMBot(token string, lastNomineesMaxLength int, logger *log.Logger) (Bot, error) {
 	rtm := slack.New(token).NewRTM()
 
+	lastNominees := nominees{
+		list:      make([]string, 0, lastNomineesMaxLength),
+		maxLength: lastNomineesMaxLength,
+	}
+
 	bot := rtmBot{
-		rtm:                   rtm,
-		incomingEvents:        rtm.IncomingEvents,
-		halt:                  make(chan chan error),
-		logger:                logger,
-		gen:                   rand.New(rand.NewSource(time.Now().UnixNano())),
-		lastNominees:          make(nominees, 0, lastNomineesMaxLength),
-		lastNomineesMaxLength: lastNomineesMaxLength,
+		rtm:            rtm,
+		incomingEvents: rtm.IncomingEvents,
+		halt:           make(chan chan error),
+		logger:         logger,
+		gen:            rand.New(rand.NewSource(time.Now().UnixNano())),
+		lastNominees:   lastNominees,
 	}
 
 	go rtm.ManageConnection()
