@@ -13,13 +13,19 @@ func TestItAddsANewUserToTheNominees(t *testing.T) {
 	}{
 		{
 			"Bidoof",
-			nominees{},
-			nominees{"Bidoof"},
+			nominees{list: []string{}, maxLength: 5},
+			nominees{list: []string{"Bidoof"}, maxLength: 5},
 		},
 		{
 			"Bidoof",
-			nominees{"Tortank", "Pikachu", "Dracofeu", "Salamèche", "Goélise"},
-			nominees{"Pikachu", "Dracofeu", "Salamèche", "Goélise", "Bidoof"},
+			nominees{
+				list:      []string{"Tortank", "Pikachu", "Dracofeu", "Salamèche", "Goélise"},
+				maxLength: 5,
+			},
+			nominees{
+				list:      []string{"Pikachu", "Dracofeu", "Salamèche", "Goélise", "Bidoof"},
+				maxLength: 5,
+			},
 		},
 	}
 
