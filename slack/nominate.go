@@ -20,7 +20,7 @@ func (r *rtmBot) handleNominate(callerID, channelID string) error {
 		return err
 	}
 
-	excludedUsersIDs := append([]string{r.rtm.GetInfo().User.ID, callerID}, r.lastNominees...)
+	excludedUsersIDs := append([]string{r.rtm.GetInfo().User.ID, callerID}, r.lastNominees.list...)
 
 	userIDs = filter(userIDs, excludedUsersIDs...)
 

@@ -43,8 +43,13 @@ type rtmBot struct {
 }
 
 // NewRTMBot builds an RTM bot
-func NewRTMBot(token string, logger *log.Logger) (Bot, error) {
+func NewRTMBot(token string, lastNomineesMaxLength int, logger *log.Logger) (Bot, error) {
 	rtm := slack.New(token).NewRTM()
+
+	lastNominees := nominees{
+		list:      make([]string, 0, lastNomineesMaxLength),
+		maxLength: lastNomineesMaxLength,
+	}
 
 	bot := rtmBot{
 		rtm:            rtm,
@@ -52,7 +57,7 @@ func NewRTMBot(token string, logger *log.Logger) (Bot, error) {
 		halt:           make(chan chan error),
 		logger:         logger,
 		gen:            rand.New(rand.NewSource(time.Now().UnixNano())),
-		lastNominees:   make(nominees, 0, 5),
+		lastNominees:   lastNominees,
 	}
 
 	go rtm.ManageConnection()
