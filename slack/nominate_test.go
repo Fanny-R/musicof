@@ -182,10 +182,16 @@ func TestHandleNominateNotifiesNominatedUser(t *testing.T) {
 		},
 	}
 
+	lastNominees := nominees{
+		list:      make([]string, 0, 5),
+		maxLength: 5,
+	}
+
 	bot := rtmBot{
-		rtm:    fakeClient,
-		gen:    fakeGenerator,
-		logger: log.New(ioutil.Discard, "testmusicof-bot: ", log.Lshortfile|log.LstdFlags),
+		rtm:          fakeClient,
+		gen:          fakeGenerator,
+		logger:       log.New(ioutil.Discard, "testmusicof-bot: ", log.Lshortfile|log.LstdFlags),
+		lastNominees: lastNominees,
 	}
 
 	err := bot.handleNominate(caller, channel)
