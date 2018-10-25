@@ -29,6 +29,10 @@ type intGenerator interface {
 	Intn(n int) int
 }
 
+type messageHandler interface {
+	Handle(evt *slack.MessageEvent) error
+}
+
 type rtmBot struct {
 	rtm rtmClient
 	gen intGenerator
@@ -40,6 +44,10 @@ type rtmBot struct {
 	halt chan chan error
 
 	logger *log.Logger
+
+	nominate messageHandler
+	help     messageHandler
+	stats    messageHandler
 }
 
 // NewRTMBot builds an RTM bot
@@ -125,7 +133,8 @@ func (r *rtmBot) handleMessage(ev *slack.MessageEvent) error {
 	}
 
 	if strings.Contains(ev.Text, "nominate") {
-		return r.handleNominate(ev.User, ev.Channel)
+		return r.noninate.Handle(ev)
+		//return r.handleNominate(ev.User, ev.Channel)
 	}
 
 	if strings.Contains(ev.Text, "help") {
